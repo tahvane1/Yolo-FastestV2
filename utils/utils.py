@@ -22,6 +22,7 @@ def load_datafile(data_path):
 
            "pre_weights": None,        
            "classes": None,
+           "channels": None,
            "width": None,
            "height": None,           
            "anchor_num": None,
@@ -38,7 +39,7 @@ def load_datafile(data_path):
     list_type_key = ["anchors", "steps"]
     str_type_key = ["model_name", "val", "train", "names", "pre_weights"]
     int_type_key = ["epochs", "batch_size", "classes", "width",
-                   "height", "anchor_num", "subdivisions"]
+                   "height", "anchor_num", "subdivisions","channels"]
     float_type_key = ["learning_rate"]
     
     #加载配置文件

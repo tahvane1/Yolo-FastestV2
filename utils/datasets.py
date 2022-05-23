@@ -75,7 +75,7 @@ def collate_fn(batch):
     return torch.stack(img), torch.cat(label, 0)
 
 class TensorDataset():
-    def __init__(self, path, img_size_width = 352, img_size_height = 352, imgaug = False):
+    def __init__(self, path, img_size_width = 352, img_size_height = 352, imgaug = False, channels=3):
         assert os.path.exists(path), "%s文件路径错误或不存在" % path
 
         self.path = path
@@ -84,6 +84,7 @@ class TensorDataset():
         self.img_size_height = img_size_height
         self.img_formats = ['bmp', 'jpg', 'jpeg', 'png']
         self.imgaug = imgaug
+        self.channels = channels
 
         # 数据检查
         with open(self.path, 'r') as f:
@@ -103,12 +104,18 @@ class TensorDataset():
         label_path = img_path.split(".")[0] + ".txt"
 
         # 归一化操作
-        img = cv2.imread(img_path)
+        if self.channels ==1:
+            img = cv2.imread(img_path,cv2.IMREAD_GRAYSCALE)
+        else:
+            img = cv2.imread(img_path)
         img = cv2.resize(img, (self.img_size_width, self.img_size_height), interpolation = cv2.INTER_LINEAR) 
         #数据增强
         if self.imgaug == True:
             img = img_aug(img)
-        img = img.transpose(2,0,1)
+        if self.channels == 1:
+            img = np.expand_dims(img,axis=0)
+        else:
+            img = img.transpose(2,0,1)
 
         # 加载label文件
         if os.path.exists(label_path):

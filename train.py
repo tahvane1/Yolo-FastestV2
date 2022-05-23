@@ -24,6 +24,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', type=str, default='',
                         help='Specify training profile *.data')
+
     opt = parser.parse_args()
     cfg = utils.utils.load_datafile(opt.data)
 
@@ -31,8 +32,8 @@ if __name__ == '__main__':
     print(cfg)
 
     # 数据集加载
-    train_dataset = utils.datasets.TensorDataset(cfg["train"], cfg["width"], cfg["height"], imgaug = True)
-    val_dataset = utils.datasets.TensorDataset(cfg["val"], cfg["width"], cfg["height"], imgaug = False)
+    train_dataset = utils.datasets.TensorDataset(cfg["train"], cfg["width"], cfg["height"], imgaug = True,channels = cfg['channels'])
+    val_dataset = utils.datasets.TensorDataset(cfg["val"], cfg["width"], cfg["height"], imgaug = False,channels = cfg['channels'])
 
     batch_size = int(cfg["batch_size"] / cfg["subdivisions"])
     nw = min([os.cpu_count(), batch_size if batch_size > 1 else 0, 8])
@@ -67,8 +68,8 @@ if __name__ == '__main__':
         load_param = True
 
     # 初始化模型结构
-    model = model.detector.Detector(cfg["classes"], cfg["anchor_num"], load_param).to(device)
-    summary(model, input_size=(3, cfg["height"], cfg["width"]))
+    model = model.detector.Detector(cfg["classes"], cfg["anchor_num"], load_param,cfg["channels"]).to(device)
+    summary(model, input_size=(cfg["channels"], cfg["height"], cfg["width"]))
 
     # 加载预训练模型参数
     if load_param == True:

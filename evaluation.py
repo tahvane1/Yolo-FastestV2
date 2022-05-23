@@ -30,7 +30,7 @@ if __name__ == '__main__':
     print("model_path:%s"%(opt.weights))
     
     #加载数据
-    val_dataset = utils.datasets.TensorDataset(cfg["val"], cfg["width"], cfg["height"], imgaug = False)
+    val_dataset = utils.datasets.TensorDataset(cfg["val"], cfg["width"], cfg["height"], imgaug = False,channels=cfg["channels"])
 
     batch_size = int(cfg["batch_size"] / cfg["subdivisions"])
     nw = min([os.cpu_count(), batch_size if batch_size > 1 else 0, 8])
@@ -49,13 +49,13 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     #初始化模型
-    model = model.detector.Detector(cfg["classes"], cfg["anchor_num"], True).to(device)
+    model = model.detector.Detector(cfg["classes"], cfg["anchor_num"], True,cfg["channels"]).to(device)
     model.load_state_dict(torch.load(opt.weights, map_location=device))
     #sets the module in eval node
     model.eval()
 
     #打印模型结构
-    summary(model, input_size=(3, cfg["height"], cfg["width"]))
+    summary(model, input_size=(cfg["channels"], cfg["height"], cfg["width"]))
     
     #模型评估
     print("computer mAP...")

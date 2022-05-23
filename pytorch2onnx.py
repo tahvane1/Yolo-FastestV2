@@ -19,12 +19,12 @@ if __name__ == '__main__':
     cfg = utils.utils.load_datafile(opt.data)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.detector.Detector(cfg["classes"], cfg["anchor_num"], True, True).to(device)
+    model = model.detector.Detector(cfg["classes"], cfg["anchor_num"], True,cfg["channels"], True).to(device)
     model.load_state_dict(torch.load(opt.weights, map_location=device))
     #sets the module in eval node
     model.eval()
 
-    test_data = torch.rand(1, 3, cfg["height"], cfg["width"]).to(device)
+    test_data = torch.rand(1, cfg["channels"], cfg["height"], cfg["width"]).to(device)
     torch.onnx.export(model,                    #model being run
                      test_data,                 # model input (or a tuple for multiple inputs)
                      opt.output,               # where to save the model (can be a file or file-like object)

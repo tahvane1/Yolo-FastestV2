@@ -63,16 +63,17 @@ class ShuffleV2Block(nn.Module):
         return x[0], x[1]
 
 class ShuffleNetV2(nn.Module):
-    def __init__(self, stage_out_channels, load_param):
+    def __init__(self, stage_out_channels, load_param,channels=3):
         super(ShuffleNetV2, self).__init__()
 
         self.stage_repeats = [4, 8, 4]
         self.stage_out_channels = stage_out_channels
+        self.channels = channels
 
         # building first layer
         input_channel = self.stage_out_channels[1]
         self.first_conv = nn.Sequential(
-            nn.Conv2d(3, input_channel, 3, 2, 1, bias=False),
+            nn.Conv2d(channels, input_channel, 3, 2, 1, bias=False),
             nn.BatchNorm2d(input_channel),
             nn.ReLU(inplace=True),
         )
@@ -111,12 +112,18 @@ class ShuffleNetV2(nn.Module):
     def _initialize_weights(self):
         print("initialize_weights...")
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.load_state_dict(torch.load("./model/backbone/backbone.pth", map_location=device), strict = True)
+        if self.channels == 1:
+            pretrained_dict = torch.load("./model/backbone/backbone.pth", map_location=device)
+            pretrained_dict.update([('first_conv.0.weight',  torch.rand(self.stage_out_channels[1], self.channels, 3, 3))])
+            self.load_state_dict(pretrained_dict, strict = True)
+        #pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+        else:
+            self.load_state_dict(torch.load("./model/backbone/backbone.pth", map_location=device), strict = True)
 
 if __name__ == "__main__":
     model = ShuffleNetV2()
     print(model)
-    test_data = torch.rand(1, 3, 320, 320)
+    test_data = torch.rand(1, 1, 320, 320)
     test_outputs = model(test_data)
     for out in test_outputs:
         print(out.size())
