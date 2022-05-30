@@ -114,7 +114,8 @@ class ShuffleNetV2(nn.Module):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if self.channels == 1:
             pretrained_dict = torch.load("./model/backbone/backbone.pth", map_location=device)
-            pretrained_dict.update([('first_conv.0.weight',  torch.rand(self.stage_out_channels[1], self.channels, 3, 3))])
+            tensor = pretrained_dict['first_conv.0.weight'][:,0,:,:].reshape((self.stage_out_channels[0], self.channels, 3, 3))
+            pretrained_dict.update([('first_conv.0.weight',  tensor)])
             self.load_state_dict(pretrained_dict, strict = True)
         #pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
         else:
